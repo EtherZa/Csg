@@ -34,6 +34,29 @@ namespace Csg
 			return csg;
 		}
 
+		public double ComputeVolume()
+		{
+			var volume = Polygons
+				.Where (polygon => polygon.Vertices.Count >= 3)
+				.SelectMany (
+					polygon => {
+						var firstVertex = polygon.Vertices[0].Pos;
+						return Enumerable.Range(0, polygon.Vertices.Count - 2)
+							.Select(
+								i => 
+								{
+									var p1 = firstVertex;
+									var p2 = polygon.Vertices[i + 1].Pos;
+									var p3 = polygon.Vertices[i + 2].Pos;
+
+									return p1.Dot (p2.Cross (p3)) / 6.0;
+								});
+					})
+				.Sum();
+
+			return Math.Abs(volume);
+		}
+
 		public Solid Union(params Solid[] others)
 		{
 			if (others.Length == 0) {
